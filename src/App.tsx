@@ -7,6 +7,7 @@ import {
     setPriorityFilter,
     setSearchTerm,
     setStatusFilter,
+    setDateRange,
 } from './core/taskSlice';
 
 import { loadFilterSettings, saveFilterSettings, loadTasks } from './storage/taskStorage';
@@ -16,6 +17,7 @@ import TaskList from './ui/TaskList';
 import FilterPanel from './ui/FilterPanel';
 import SearchBar from './ui/SearchBar';
 import GroupToggle from './ui/GroupToggle';
+import DateFilterPanel from './ui/DateFilterPanel';
 
 function App() {
     const dispatch = useDispatch();
@@ -29,15 +31,16 @@ function App() {
         dispatch(setPriorityFilter(filters.priority as any));
         dispatch(setSearchTerm(filters.searchTerm));
         dispatch(setGroupBy(filters.groupBy as any));
+        dispatch(setDateRange(filters.dateRange as any));
         setIsLoaded(true);
     }, [dispatch]);
 
     useEffect(() => {
         if (!isLoaded) return;
-
         saveFilterSettings({
             status: filter.status,
             priority: filter.priority,
+            dateRange: filter.dateRange,
             searchTerm,
             groupBy,
         });
@@ -49,6 +52,7 @@ function App() {
             <TaskInput />
             <FilterPanel />
             <SearchBar />
+            <DateFilterPanel />
             <GroupToggle />
             <TaskList />
         </main>

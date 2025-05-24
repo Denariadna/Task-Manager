@@ -15,6 +15,7 @@ export const loadTasks = (): Task[] => {
 export const saveFilterSettings = (filters: {
     status: string;
     priority: string;
+    dateRange: string;
     searchTerm: string;
     groupBy: string;
 }) => {
@@ -24,11 +25,18 @@ export const saveFilterSettings = (filters: {
 export const loadFilterSettings = (): {
     status: string;
     priority: string;
+    dateRange: string;
     searchTerm: string;
     groupBy: string;
 } => {
     const data = localStorage.getItem(FILTERS_KEY);
     return data
         ? JSON.parse(data)
-        : { status: 'all', priority: 'all', searchTerm: '', groupBy: 'none' };
+        : {
+              status: 'all',
+              priority: 'all',
+              dateRange: 'all',
+              searchTerm: '',
+              groupBy: 'none',
+          };
 };

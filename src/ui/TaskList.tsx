@@ -6,6 +6,32 @@ import { Task } from '../core/model';
 const TaskList = () => {
     const { tasks, filter, searchTerm, groupBy } = useSelector((state: RootState) => state.tasks);
 
+    const todayDate = new Date();
+    const startOfDay = new Date(todayDate);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const isInDateRange = (task: Task): boolean => {
+        const due = new Date(task.dueDate);
+        due.setHours(0, 0, 0, 0);
+
+        switch (filter.dateRange) {
+            case 'today':
+                return due.getTime() === startOfDay.getTime();
+            case 'week':
+                const weekFromToday = new Date(startOfDay);
+                weekFromToday.setDate(startOfDay.getDate() + 7);
+                return due >= startOfDay && due <= weekFromToday;
+            case 'month':
+                const monthFromToday = new Date(startOfDay);
+                monthFromToday.setMonth(startOfDay.getMonth() + 1);
+                return due >= startOfDay && due <= monthFromToday;
+            case 'overdue':
+                return due < startOfDay;
+            default:
+                return true;
+        }
+    };
+
     const filteredTasks = tasks.filter((task: Task) => {
         const statusMatch =
             filter.status === 'all' ||
@@ -16,7 +42,9 @@ const TaskList = () => {
 
         const searchMatch = task.title.toLowerCase().includes(searchTerm.toLowerCase());
 
-        return statusMatch && priorityMatch && searchMatch;
+        const dateMatch = isInDateRange(task);
+
+        return statusMatch && priorityMatch && searchMatch && dateMatch;
     });
 
     const groupedByPriority = () => {
