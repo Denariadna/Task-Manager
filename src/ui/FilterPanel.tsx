@@ -3,15 +3,17 @@ import { RootState } from '../app/store';
 import { Button } from '@/ui/button';
 import { setStatusFilter, setPriorityFilter } from '../core/taskSlice';
 
+// панель фильтрации задач по статусу и приоритету
 const FilterPanel = () => {
     const dispatch = useDispatch();
-    const filter = useSelector((state: RootState) => state.tasks.filter);
+    const filter = useSelector((state: RootState) => state.tasks.filter); // текущие фильтры
 
     return (
         <div className="flex flex-wrap gap-2 mb-4">
+            {/* блок фильтра по статусу */}
             <span className="text-sm font-semibold w-full">Статус:</span>
             <Button
-                variant={filter.status === 'all' ? 'default' : 'outline'}
+                variant={filter.status === 'all' ? 'default' : 'outline'} // если выбран — активный стиль
                 onClick={() => dispatch(setStatusFilter('all'))}
             >
                 Все
@@ -29,6 +31,7 @@ const FilterPanel = () => {
                 Активные
             </Button>
 
+            {/* блок фильтра по приоритету */}
             <span className="text-sm font-semibold w-full pt-2">Приоритет:</span>
             <Button
                 variant={filter.priority === 'low' ? 'default' : 'outline'}

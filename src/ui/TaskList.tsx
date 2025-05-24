@@ -2,14 +2,20 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../app/store';
 import TaskItem from './TaskItem';
 import { Task } from '../core/model';
+import { motion, AnimatePresence } from 'framer-motion';
 
+// компонент отображения списка задач
 const TaskList = () => {
-    const { tasks, filter, searchTerm, groupBy } = useSelector((state: RootState) => state.tasks);
+    const { tasks, filter, searchTerm, groupBy, activeTag } = useSelector(
+        (state: RootState) => state.tasks
+    );
 
+    // подготовка текущей даты для сравнения
     const todayDate = new Date();
     const startOfDay = new Date(todayDate);
     startOfDay.setHours(0, 0, 0, 0);
 
+    // функция фильтрации по диапазону дат
     const isInDateRange = (task: Task): boolean => {
         const due = new Date(task.dueDate);
         due.setHours(0, 0, 0, 0);
@@ -32,6 +38,7 @@ const TaskList = () => {
         }
     };
 
+    // основная фильтрация задач по всем параметрам
     const filteredTasks = tasks.filter((task: Task) => {
         const statusMatch =
             filter.status === 'all' ||
@@ -40,13 +47,19 @@ const TaskList = () => {
 
         const priorityMatch = filter.priority === 'all' || task.priority === filter.priority;
 
-        const searchMatch = task.title.toLowerCase().includes(searchTerm.toLowerCase());
+        const searchMatch =
+            task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            task.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
 
         const dateMatch = isInDateRange(task);
 
-        return statusMatch && priorityMatch && searchMatch && dateMatch;
+        const tagMatch = activeTag ? task.tags.includes(activeTag) : true;
+
+        // работа фильтрации
+        return statusMatch && priorityMatch && searchMatch && dateMatch && tagMatch;
     });
 
+    // группировка задач по приоритету
     const groupedByPriority = () => {
         const priorities = ['high', 'medium', 'low'];
         return priorities
@@ -57,10 +70,12 @@ const TaskList = () => {
             .filter(group => group.tasks.length > 0);
     };
 
+    // если задач нет — показываем сообщение
     if (!filteredTasks.length) {
         return <p className="text-muted-foreground">Нет задач по выбранным фильтрам.</p>;
     }
 
+    // отображение задач с группировкой по приоритету
     if (groupBy === 'priority') {
         return (
             <div className="space-y-4">
@@ -72,9 +87,19 @@ const TaskList = () => {
                             {group.priority === 'low' && '🟢 Низкий приоритет'}
                         </h3>
                         <div className="space-y-2">
-                            {group.tasks.map(task => (
-                                <TaskItem key={task.id} task={task} />
-                            ))}
+                            <AnimatePresence>
+                                {group.tasks.map(task => (
+                                    <motion.div
+                                        key={task.id}
+                                        initial={{ opacity: 0, y: 5 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.95 }}
+                                        transition={{ duration: 0.2 }}
+                                    >
+                                        <TaskItem task={task} />
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
                         </div>
                     </div>
                 ))}
@@ -82,11 +107,22 @@ const TaskList = () => {
         );
     }
 
+    // обычное отображение без группировки
     return (
         <div className="space-y-2">
-            {filteredTasks.map(task => (
-                <TaskItem key={task.id} task={task} />
-            ))}
+            <AnimatePresence>
+                {filteredTasks.map(task => (
+                    <motion.div
+                        key={task.id}
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.2 }}
+                    >
+                        <TaskItem task={task} />
+                    </motion.div>
+                ))}
+            </AnimatePresence>
         </div>
     );
 };
